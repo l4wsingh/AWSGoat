@@ -353,7 +353,9 @@ resource "aws_launch_template" "ecs_launch_template" {
   name_prefix   = "ecs-launch-template-"
   image_id      = data.aws_ami.ecs_optimized_ami.id
   instance_type = "t2.micro"
-  user_data     = data.template_file.user_data.rendered
+
+  # Explicitly base64 encode user data
+  user_data = base64encode(data.template_file.user_data.rendered)
 
   # IAM instance profile as a block
   iam_instance_profile {
@@ -376,7 +378,6 @@ resource "aws_launch_template" "ecs_launch_template" {
     create_before_destroy = true
   }
 }
-
 resource "aws_autoscaling_group" "ecs_asg" {
   name                 = "ECS-lab-asg"
   vpc_zone_identifier  = [aws_subnet.lab-subnet-public-1.id]
