@@ -349,17 +349,20 @@ data "aws_ami" "ecs_optimized_ami" {
 }
 
 
-
 resource "aws_launch_template" "ecs_launch_template" {
-  name_prefix          = "ecs-launch-template-"
-  image_id             = data.aws_ami.ecs_optimized_ami.id
-  iam_instance_profile = aws_iam_instance_profile.ecs-instance-profile.name
-  security_groups      = [aws_security_group.ecs_sg.id]
-  user_data            = data.template_file.user_data.rendered
-  instance_type        = "t2.micro"
+  name_prefix   = "ecs-launch-template-"
+  image_id      = data.aws_ami.ecs_optimized_ami.id
+  instance_type = "t2.micro"
+  user_data     = data.template_file.user_data.rendered
 
+  # IAM instance profile as a block
   iam_instance_profile {
-  name = aws_iam_instance_profile.ecs-instance-profile.name
+    name = aws_iam_instance_profile.ecs-instance-profile.name
+  }
+
+  # Network interface and security groups as a block
+  network_interfaces {
+    security_groups = [aws_security_group.ecs_sg.id]
   }
 
   tag_specifications {
